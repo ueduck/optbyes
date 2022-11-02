@@ -9,10 +9,10 @@ class OptByes:
     OPTIMAL = 2
     INFEASIBLE = 3
 
-    def __init__(self, team_sequences: dict[int, tuple[int, int, int]]) -> None:
-        self._team_sequences = team_sequences
-        self._num_teams = len(team_sequences)
-        self._num_rounds = len(team_sequences) - 1
+    def __init__(self, team_sequence: dict[int, tuple[int, int, int]]) -> None:
+        self._team_sequence = team_sequence
+        self._num_teams = len(team_sequence)
+        self._num_rounds = len(team_sequence) - 1
         self._status = self.LOAD
         self._optimal_state: Prob
 
@@ -20,7 +20,7 @@ class OptByes:
         infeasible_flag = True
         while self._num_rounds <= 2 * self._num_teams - 1:
             print(f"\033[31m num_rounds = {self._num_rounds}\033[0m")
-            p = Prob(self._num_teams, self._num_rounds, self._team_sequences)
+            p = Prob(self._num_teams, self._num_rounds, self._team_sequence)
             p.solve()
             # 最適解が見つかればそれを出力して終了
             if p.getStatus() == gp.GRB.OPTIMAL:

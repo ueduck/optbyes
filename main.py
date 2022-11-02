@@ -9,7 +9,7 @@ def main() -> None:
     s = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 3, 1)}
     p = OptByes(s)
     p.solve()
-    if p.getStatus == OptByes.OPTIMAL:
+    if p.getStatus() == OptByes.OPTIMAL:
         p.printSchedule()
 
 

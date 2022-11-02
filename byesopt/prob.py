@@ -4,19 +4,19 @@ import gurobipy as gp
 class Prob:
     CUTOFF_TIME = 600
 
-    def __init__(self, num_teams: int, num_rounds: int, team_sequences: dict[int, tuple[int, int, int]]) -> None:
+    def __init__(self, num_teams: int, num_rounds: int, team_sequence: dict[int, tuple[int, int, int]]) -> None:
         self._num_teams = num_teams
         self._num_rounds = num_rounds
-        self._team_sequences = self._makeSequence(team_sequences)
+        self._team_sequence = self._makeSequence(team_sequence)
         self._model = gp.Model("ByesModel")
         self._xvar: dict[tuple[int, int, int], gp.Var] = {}
         self._yvar: dict[tuple[int, int], gp.Var] = {}
 
     @staticmethod
-    def _makeSequence(team_sequences: dict[int, tuple[int, int, int]]) -> dict[tuple[int, int, int], int]:
+    def _makeSequence(team_sequence: dict[int, tuple[int, int, int]]) -> dict[tuple[int, int, int], int]:
         s_ijk = {}
         # 先行順序が必要なところだけ1を埋める
-        for team_k, seq in team_sequences.items():
+        for team_k, seq in team_sequence.items():
             for i in range(len(seq) - 1):
                 team_i = seq[i]
                 for j in range(i + 1, len(seq)):
@@ -24,9 +24,9 @@ class Prob:
                     s_ijk[team_k, team_i, team_j] = 1
 
         # 先行順序が定まっていなければ0を埋める(Model内でのKeyError対策)
-        for t in team_sequences.keys():
-            for i in team_sequences.keys():
-                for j in team_sequences.keys():
+        for t in team_sequence.keys():
+            for i in team_sequence.keys():
+                for j in team_sequence.keys():
                     try:
                         s_ijk[t, i, j]
                     except KeyError:
@@ -78,15 +78,15 @@ class Prob:
             for k in range(1, self._num_teams + 1):
                 for j in range(1, self._num_teams + 1):
                     for r in range(2, self._num_rounds + 1):
-                        c51 = self._team_sequences[k, i, j] * gp.quicksum(self._xvar[k, i, rp] for rp in range(1, r))
-                        c52 = self._team_sequences[k, i, j] * self._xvar[k, j, r]
+                        c51 = self._team_sequence[k, i, j] * gp.quicksum(self._xvar[k, i, rp] for rp in range(1, r))
+                        c52 = self._team_sequence[k, i, j] * self._xvar[k, j, r]
                         self._model.addConstr(c51 >= c52)
 
         # 6
         for k in range(1, self._num_teams + 1):
             for j in range(1, self._num_teams + 1):
                 c61 = self._num_teams * (1 - self._xvar[k, j, 1])
-                c62 = gp.quicksum(self._team_sequences[k, i, j] for i in range(1, self._num_teams + 1))
+                c62 = gp.quicksum(self._team_sequence[k, i, j] for i in range(1, self._num_teams + 1))
                 self._model.addConstr(c61 >= c62)
 
         # 7
