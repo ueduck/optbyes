@@ -1,4 +1,4 @@
-# byesopt - Byesを最小にするスケジュールの作成 -
+# optbyes - Byesを最小にするスケジュールの作成 -
 byesを最小にするスケジューリングを作成します．またそのようなスケジュールが存在しない場合は，実行不能であることを知らせます．
 
 ## 環境構築方法
@@ -9,7 +9,7 @@ curl -sSL https://raw.githubusercontent.com/python-poetry/
 ```
 によってPoetryをインストールしてください．次に本リポジトリをcloneしてください．
 ```
-git clone https://github.com/hrt0809/byesopt
+git clone https://github.com/hrt0809/optbyes
 ```
 最後に本リポジトリ中の```pyproject.toml```を使って仮想環境を作成します．
 ```
