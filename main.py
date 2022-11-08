@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 
 
-from byesopt.optbyes import OptByes
+from byesopt.optbyes import OptimizeByes
+from byesopt.prob import BaseProblemFactory
+from byesopt.utils import TeamSequence
 
 
 def main() -> None:
-    s = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 3, 1)}
-    p = OptByes(s)
-    p.solve()
-    if p.getStatus() == OptByes.OPTIMAL:
-        p.printSchedule()
+    s: TeamSequence = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 3, 1)}
+    base_problem_factory = BaseProblemFactory()
+    ob = OptimizeByes(s, base_problem_factory)
+    ob.solve()
+    if ob.get_status() == OptimizeByes.OPTIMAL:
+        ob.print_schedule()
 
 
 def check() -> None:
