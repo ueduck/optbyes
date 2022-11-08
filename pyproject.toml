@@ -6,7 +6,7 @@ authors = ["hrt0809 <hrt.ueda0809@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-gurobipy = "9.5.2"
+gurobipy = "10.0.0"
 gurobipy-stubs = "*"
 
 [tool.poetry.dev-dependencies]
