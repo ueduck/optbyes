@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "byesopt"
+name = "optbyes"
 version = "0.1.0"
 description = "byesを最小にするスケジュールの作成"
 authors = ["hrt0809 <hrt.ueda0809@gmail.com>"]
