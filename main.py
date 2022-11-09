@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from byesopt.optbyes import OptimizeByes
-from byesopt.prob import (BaseProblemFactory,
-                          MinimizeConsecutiveByesProblemFactory,
-                          ProblemFactory)
+from byesopt.prob import BaseProblemFactory, MinimizeConsecutiveByesProblemFactory, ProblemFactory
 from byesopt.utils import TeamSequence
 
 
