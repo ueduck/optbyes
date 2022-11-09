@@ -28,6 +28,7 @@ def check_all_combinations(num_teams: int = 4) -> None:
     cnt = 0
     cnt_feasible = 0
     opt_rounds = {i: 0 for i in range(num_teams - 1, 2 * num_teams)}
+    opt_rounds_seqences = {i: [] for i in range(num_teams - 1, 2 * num_teams)}
     for x in itertools.product(*(team_seqences.values())):
         # [NOTE] Type check of mypy is wrong.
         team_seqence: TeamSequence = {i: s for i, s in enumerate(x, 1)}  # type: ignore
@@ -36,10 +37,13 @@ def check_all_combinations(num_teams: int = 4) -> None:
         ob.solve()
         if ob.get_status() == OptimizeByes.OPTIMAL:
             opt_rounds[ob.get_num_rounds()] += 1
+            opt_rounds_seqences[ob.get_num_rounds()].append(team_seqence)
             cnt_feasible += 1
         cnt += 1
     print(f"組合せ全体: {cnt}, 実行可能な組合せ: {cnt_feasible}")
     print(f"{opt_rounds = }")
+    num_rounds = num_teams - 1
+    print(f"{opt_rounds_seqences[num_rounds]}")
 
 
 if __name__ == "__main__":
