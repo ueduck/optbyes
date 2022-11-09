@@ -1,6 +1,6 @@
 class NotRunningSolveMethodError(Exception):
-    """solveメソッドが実行されていない"""
+    """Execute the OptimizeByes.solve()."""
 
 
 class InfeasibleInstanceError(Exception):
-    """実行不可能なインスタンス"""
+    """Infeasible instance."""

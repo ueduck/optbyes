@@ -59,6 +59,9 @@ class OptimizeByes:
         if infeasible_flag:
             self._status = self.INFEASIBLE
 
+    def get_num_rounds(self) -> int:
+        return self._num_rounds
+
     def get_status(self) -> int:
         return self._status
 
