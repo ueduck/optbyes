@@ -1,5 +1,5 @@
 from .exception import InfeasibleInstanceError, NotRunningSolveMethodError
-from .prob import Problem, ProblemFactory
+from .problem import Problem, ProblemFactory
 from .utils import Schedule, TeamSequence, TeamSequenceArray
 
 
