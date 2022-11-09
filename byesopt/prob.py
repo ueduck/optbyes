@@ -11,6 +11,7 @@ class Problem(metaclass=ABCMeta):
     LOADED = 1
     OPTIMAL = 2
     INFEASIBLE = 3
+    BYES = "b"
 
     def __init__(self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray) -> None:
         self._num_teams = num_teams
@@ -41,10 +42,6 @@ class Problem(metaclass=ABCMeta):
         self._create_objective_function()
         self._optimize(cutoff_time)
 
-    @abstractmethod
-    def get_num_byes(self) -> int:
-        raise NotImplementedError()
-
     @final
     def get_status(self) -> int:
         return self._status
@@ -62,6 +59,16 @@ class Problem(metaclass=ABCMeta):
     @abstractmethod
     def get_schedule(self) -> Schedule:
         raise NotImplementedError()
+
+    @final
+    def get_num_byes(self) -> int:
+        schedule = self.get_schedule()
+        cnt_byes = 0
+        for i in range(1, self._num_teams + 1):
+            for r in range(1, self._num_rounds + 1):
+                if schedule[i][r] == self.BYES:
+                    cnt_byes += 1
+        return cnt_byes
 
     @final
     def print_schedule(self) -> None:
@@ -162,14 +169,6 @@ class BaseProblem(Problem):
         self._model.optimize()
         self._status = self._model.Status
 
-    def get_num_byes(self) -> int:
-        num_byes = 0
-        for i in range(1, self._num_teams + 1):
-            for r in range(1, self._num_rounds + 1):
-                if self._yvar[i, r].X == 1:
-                    num_byes += 1
-        return num_byes
-
     def get_schedule(self) -> Schedule:
         self._check_status()
         teams: Schedule = {}
@@ -177,7 +176,7 @@ class BaseProblem(Problem):
             team_i = {}
             for r in range(1, self._num_rounds + 1):
                 if self._yvar[i, r].X == 1:
-                    team_i[r] = "b"
+                    team_i[r] = self.BYES
                 for j in range(1, self._num_teams + 1):
                     if self._xvar[i, j, r].X == 1:
                         team_i[r] = str(j)
