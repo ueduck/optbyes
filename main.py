@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from byesopt.optbyes import OptimizeByes
-from byesopt.prob import BaseProblemFactory, MinimizeConsecutiveByesProblemFactory, ProblemFactory
-from byesopt.utils import TeamSequence
+from optbyes.optbyes import OptimizeByes
+from optbyes.problem import BaseProblemFactory, MinimizeConsecutiveByesProblemFactory, ProblemFactory
+from optbyes.utils import TeamSequence
 
 
 def main(prob_type: str = "base") -> None:

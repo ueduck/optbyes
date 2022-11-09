@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from byesopt.optbyes import OptimizeByes
-from byesopt.prob import BaseProblem, Problem
-from byesopt.utils import TeamSequence
+from optbyes.optbyes import OptimizeByes
+from optbyes.problem import BaseProblem, Problem
+from optbyes.utils import TeamSequence
 
 
 def test_byes_teams4_rounds5() -> None:
