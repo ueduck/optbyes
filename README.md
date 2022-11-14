@@ -5,7 +5,7 @@ byesを最小にするスケジューリングを作成します．またその�
 本プログラムは[Python 3.10](https://www.python.org)を利用しています．またパッケージ管理には[Poetry](https://python-poetry.org)を利用しています．
 まずはじめに[Python.orgのダウンロードページ](https://www.python.org/downloads/)より，Pyhton 3.10をインストールしてください．また，
 ```
-curl -sSL https://raw.githubusercontent.com/python-poetry/
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 ```
 によってPoetryをインストールしてください．次に本リポジトリをcloneしてください．
 ```
