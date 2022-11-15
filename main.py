@@ -28,7 +28,7 @@ def check_all_combinations(num_teams: int = 4) -> None:
     cnt = 0
     cnt_feasible = 0
     opt_rounds = {i: 0 for i in range(num_teams - 1, 2 * num_teams)}
-    opt_rounds_seqences = {i: [] for i in range(num_teams - 1, 2 * num_teams)}
+    opt_rounds_seqences: dict[int, list[TeamSequence]] = {i: [] for i in range(num_teams - 1, 2 * num_teams)}
     for x in itertools.product(*(team_seqences.values())):
         # [NOTE] Type check of mypy is wrong.
         team_seqence: TeamSequence = {i: s for i, s in enumerate(x, 1)}  # type: ignore
