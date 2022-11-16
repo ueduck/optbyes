@@ -3,8 +3,8 @@ from abc import ABCMeta, abstractmethod
 import gurobipy as gp
 from typing_extensions import final
 
-from .exception import InfeasibleInstanceError, NotRunningSolveMethodError
-from .utils import Schedule, TeamSequenceArray
+from optbyes._typing import Schedule, TeamPriorityArray
+from optbyes.exception import InfeasibleInstanceError, NotRunningSolveMethodError
 
 
 class Problem(metaclass=ABCMeta):
@@ -13,10 +13,10 @@ class Problem(metaclass=ABCMeta):
     INFEASIBLE = 3
     BYES = "b"
 
-    def __init__(self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray) -> None:
+    def __init__(self, num_teams: int, num_rounds: int, team_priority_array: TeamPriorityArray) -> None:
         self._num_teams = num_teams
         self._num_rounds = num_rounds
-        self._team_sequence_array = team_sequence_array
+        self._team_priority_array = team_priority_array
         self._status: int = self.LOADED
 
     @abstractmethod
@@ -98,8 +98,8 @@ class Problem(metaclass=ABCMeta):
 class BaseProblem(Problem):
     MODEL_NAME = "BaseModel"
 
-    def __init__(self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray) -> None:
-        super().__init__(num_teams, num_rounds, team_sequence_array)
+    def __init__(self, num_teams: int, num_rounds: int, team_priority_array: TeamPriorityArray) -> None:
+        super().__init__(num_teams, num_rounds, team_priority_array)
         self._model = gp.Model(self.MODEL_NAME)
         self._xvar: dict[tuple[int, int, int], gp.Var] = {}
         self._yvar: dict[tuple[int, int], gp.Var] = {}
@@ -141,15 +141,15 @@ class BaseProblem(Problem):
             for k in range(1, self._num_teams + 1):
                 for j in range(1, self._num_teams + 1):
                     for r in range(2, self._num_rounds + 1):
-                        c1 = self._team_sequence_array[k, i, j] * gp.quicksum(self._xvar[k, i, x] for x in range(1, r))
-                        c2 = self._team_sequence_array[k, i, j] * self._xvar[k, j, r]
+                        c1 = self._team_priority_array[k, i, j] * gp.quicksum(self._xvar[k, i, x] for x in range(1, r))
+                        c2 = self._team_priority_array[k, i, j] * self._xvar[k, j, r]
                         self._model.addConstr(c1 >= c2)
 
         # (5)
         for k in range(1, self._num_teams + 1):
             for j in range(1, self._num_teams + 1):
                 c1 = self._num_teams * (1 - self._xvar[k, j, 1])
-                c2 = gp.quicksum(self._team_sequence_array[k, i, j] for i in range(1, self._num_teams + 1))
+                c2 = gp.quicksum(self._team_priority_array[k, i, j] for i in range(1, self._num_teams + 1))
                 self._model.addConstr(c1 >= c2)
 
         # (6)
@@ -187,8 +187,8 @@ class BaseProblem(Problem):
 class MinimizeConsecutiveByesProblem(BaseProblem):
     MODEL_NAME = "MinimizeConsecutiveByesModel"
 
-    def __init__(self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray) -> None:
-        super().__init__(num_teams, num_rounds, team_sequence_array)
+    def __init__(self, num_teams: int, num_rounds: int, team_priority_array: TeamPriorityArray) -> None:
+        super().__init__(num_teams, num_rounds, team_priority_array)
         self._model = gp.Model(self.MODEL_NAME)
         self._mvar: dict[tuple[int, int], gp.Var] = {}
 
@@ -211,21 +211,3 @@ class MinimizeConsecutiveByesProblem(BaseProblem):
             self._mvar[i, r] for i in range(1, self._num_teams + 1) for r in range(2, self._num_rounds + 1)
         )
         self._model.setObjective(obj, gp.GRB.MAXIMIZE)
-
-
-class ProblemFactory(metaclass=ABCMeta):
-    @abstractmethod
-    def create(self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray) -> Problem:
-        raise NotImplementedError()
-
-
-class BaseProblemFactory(ProblemFactory):
-    def create(self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray) -> BaseProblem:
-        return BaseProblem(num_teams, num_rounds, team_sequence_array)
-
-
-class MinimizeConsecutiveByesProblemFactory(ProblemFactory):
-    def create(
-        self, num_teams: int, num_rounds: int, team_sequence_array: TeamSequenceArray
-    ) -> MinimizeConsecutiveByesProblem:
-        return MinimizeConsecutiveByesProblem(num_teams, num_rounds, team_sequence_array)

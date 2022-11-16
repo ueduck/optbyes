@@ -1,51 +1,40 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from optbyes.optbyes import OptimizeByes
-from optbyes.problem import BaseProblemFactory, MinimizeConsecutiveByesProblemFactory, ProblemFactory
-from optbyes.utils import TeamSequence
+from optbyes import utils
+from optbyes._typing import TeamPriority
+from optbyes.optbyes import OptimizeNumberOfByes
+from optbyes.problem.factory import BaseProblemFactory, MinimizeConsecutiveByesProblemFactory, ProblemFactory
 
 
-def main(prob_type: str = "base") -> None:
-    s: TeamSequence = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 3, 1)}
-    factories = {"base": BaseProblemFactory(), "min_consec": MinimizeConsecutiveByesProblemFactory()}
-    factory: ProblemFactory = factories[prob_type]
-    ob = OptimizeByes(s, factory)
+def main(team_priority: TeamPriority, prob_type: str = "base") -> None:
+    problem_factories = {"base": BaseProblemFactory(), "min_consec": MinimizeConsecutiveByesProblemFactory()}
+    problem_factory: ProblemFactory = problem_factories[prob_type]
+    ob = OptimizeNumberOfByes(team_priority, problem_factory)
     ob.solve()
-    if ob.get_status() == OptimizeByes.OPTIMAL:
+    if ob.get_status() == OptimizeNumberOfByes.OPTIMAL:
         ob.print_schedule()
 
 
-def check_all_combinations(num_teams: int = 4) -> None:
-    import itertools
+def check_all_combinations(num_teams: int = 4, num_fixed: int = 0) -> None:
+    from scipy import special
 
-    team_seqences: dict[int, list[tuple[int, ...]]] = {i: [] for i in range(1, num_teams + 1)}
-    for i in range(1, num_teams + 1):
-        teams = [j for j in range(1, num_teams + 1) if i != j]
-        for x in itertools.permutations(teams):
-            team_seqences[i].append(x)
-
-    cnt = 0
-    cnt_feasible = 0
-    opt_rounds = {i: 0 for i in range(num_teams - 1, 2 * num_teams)}
-    opt_rounds_seqences: dict[int, list[TeamSequence]] = {i: [] for i in range(num_teams - 1, 2 * num_teams)}
-    for x in itertools.product(*(team_seqences.values())):
-        # [NOTE] Type check of mypy is wrong.
-        team_seqence: TeamSequence = {i: s for i, s in enumerate(x, 1)}  # type: ignore
+    max_round = int(special.comb(num_teams, 2, exact=True))
+    feasible_sols: dict[int, list[TeamPriority]] = {i: [] for i in range(num_teams - 1, max_round + 1)}
+    team_priorities: list[TeamPriority] = utils.generate_team_priorities(num_teams, num_fixed)
+    for tp in team_priorities:
         factory = BaseProblemFactory()
-        ob = OptimizeByes(team_seqence, factory)
+        ob = OptimizeNumberOfByes(tp, factory)
         ob.solve()
-        if ob.get_status() == OptimizeByes.OPTIMAL:
-            opt_rounds[ob.get_num_rounds()] += 1
-            opt_rounds_seqences[ob.get_num_rounds()].append(team_seqence)
-            cnt_feasible += 1
-        cnt += 1
-    print(f"組合せ全体: {cnt}, 実行可能な組合せ: {cnt_feasible}")
-    print(f"{opt_rounds = }")
-    num_rounds = num_teams - 1
-    print(f"{opt_rounds_seqences[num_rounds]}")
+        if ob.get_status() == OptimizeNumberOfByes.OPTIMAL:
+            feasible_sols[ob.get_num_rounds()].append(tp)
+
+    all_combs = len(team_priorities)
+    feasible_combs = sum(len(feasible_sols[i]) for i in range(num_teams - 1, max_round + 1))
+    print(f"{all_combs = }, {feasible_combs = }")
 
 
 if __name__ == "__main__":
-    main("base")
-    check_all_combinations(num_teams=4)
+    tp: TeamPriority = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 3, 1)}
+    main(tp, "base")
+    check_all_combinations(num_teams=4, num_fixed=0)

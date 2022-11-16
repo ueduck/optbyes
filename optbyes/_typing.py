@@ -1,3 +1,3 @@
-TeamSequence = dict[int, tuple[int, ...]]
-TeamSequenceArray = dict[tuple[int, int, int], int]
+TeamPriority = dict[int, tuple[int, ...]]
+TeamPriorityArray = dict[tuple[int, int, int], int]
 Schedule = dict[int, dict[int, str]]

@@ -1,46 +1,35 @@
-from .exception import InfeasibleInstanceError, NotRunningSolveMethodError
-from .problem import Problem, ProblemFactory
-from .utils import Schedule, TeamSequence, TeamSequenceArray
+from scipy import special
+
+from optbyes import utils
+from optbyes._typing import Schedule, TeamPriority, TeamPriorityArray
+from optbyes.exception import InfeasibleInstanceError, NotRunningSolveMethodError
+from optbyes.problem.factory import ProblemFactory
+from optbyes.problem.problem import Problem
 
 
-class OptimizeByes:
+class OptimizeNumberOfByes:
     CUTOFF_TIME = 600
     LOADED = Problem.LOADED
     OPTIMAL = Problem.OPTIMAL
     INFEASIBLE = Problem.INFEASIBLE
 
-    def __init__(self, team_sequence: TeamSequence, problem_factory: ProblemFactory) -> None:
-        self._num_teams = len(team_sequence)
-        self._num_rounds = len(team_sequence) - 1
-        self._team_sequence_array = self.make_team_sequence_array(team_sequence)
+    def _get_team_priority_array(self, team_priority: TeamPriority) -> TeamPriorityArray:
+        team_priority_array = utils.make_team_priority_array(team_priority)
+        return team_priority_array
+
+    def __init__(self, team_priority: TeamPriority, problem_factory: ProblemFactory) -> None:
+        self._team_priority_array = self._get_team_priority_array(team_priority)
+        self._num_teams = len(team_priority)
+        self._num_rounds = self._num_teams - 1  # If the num of byes is 0, all games can be played in rounds of n - 1
         self._problem_factory = problem_factory
         self._optimal_state: Problem
 
-    @staticmethod
-    def make_team_sequence_array(team_sequence: TeamSequence) -> TeamSequenceArray:
-        sequence_array = {}
-        # for team k, team i -> team j => sequence[k, i, j] = 1
-        for team_k, seq in team_sequence.items():
-            for i in range(len(seq) - 1):
-                team_i = seq[i]
-                for j in range(i + 1, len(seq)):
-                    team_j = seq[j]
-                    sequence_array[team_k, team_i, team_j] = 1
-        # otherwise
-        for t in team_sequence.keys():
-            for i in team_sequence.keys():
-                for j in team_sequence.keys():
-                    try:
-                        sequence_array[t, i, j]
-                    except KeyError:
-                        sequence_array[t, i, j] = 0
-        return sequence_array
-
     def solve(self) -> None:
         infeasible_flag = True
-        while self._num_rounds <= 2 * self._num_teams - 1:
+        max_round = int(special.comb(self._num_teams, 2, exact=True))
+        while self._num_rounds <= max_round:
             print(f"\033[31m num_rounds = {self._num_rounds}\033[0m")
-            p = self._problem_factory.create(self._num_teams, self._num_rounds, self._team_sequence_array)
+            p = self._problem_factory.create(self._num_teams, self._num_rounds, self._team_priority_array)
             self._status = self.LOADED
             p.solve()
             # Once the optimal solution is found,
