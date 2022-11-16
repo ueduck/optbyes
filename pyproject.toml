@@ -8,6 +8,8 @@ authors = ["hrt0809 <hrt.ueda0809@gmail.com>"]
 python = "^3.10"
 gurobipy = "9.5.2"
 gurobipy-stubs = "*"
+networkx = "^2.8.8"
+scipy = "^1.9.3"
 
 [tool.poetry.dev-dependencies]
 black = "*"
