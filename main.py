@@ -1,51 +1,39 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from optbyes.optbyes import OptimizeByes
-from optbyes.problem import BaseProblemFactory, MinimizeConsecutiveByesProblemFactory, ProblemFactory
-from optbyes.utils import TeamSequence
+import time
+
+import optbyes as opb
+from optbyes.utils import converter
 
 
-def main(prob_type: str = "base") -> None:
-    s: TeamSequence = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 3, 1)}
-    factories = {"base": BaseProblemFactory(), "min_consec": MinimizeConsecutiveByesProblemFactory()}
-    factory: ProblemFactory = factories[prob_type]
-    ob = OptimizeByes(s, factory)
-    ob.solve()
-    if ob.get_status() == OptimizeByes.OPTIMAL:
-        ob.print_schedule()
+def main(team_priority: opb.TeamPriority) -> None:
+    # solve Graph
+    solver_graph = opb.BaseProbSolverWithGraph.create_from_team_priority(team_priority)
+    # solve ILP
+    factory = opb.BaseILPFactory()
+    solver_ilp = opb.ProbSolverWithGurobi.create_from_team_priority(team_priority, factory)
 
+    # Graph Algorithm vs Gurobi
+    calc_times: dict[str, float] = {}
+    solvers: dict[str, opb.OptByesSolver] = {"graph": solver_graph, "gurobi": solver_ilp}
+    for solver_name, solver in solvers.items():
+        start_time = time.perf_counter()
+        solver.solve()
+        calc_time = time.perf_counter() - start_time
+        calc_times[solver_name] = calc_time
+        if solver.get_status() == opb.OPTIMAL:
+            solver.print_schedule()
+    print(calc_times)
 
-def check_all_combinations(num_teams: int = 4) -> None:
-    import itertools
-
-    team_seqences: dict[int, list[tuple[int, ...]]] = {i: [] for i in range(1, num_teams + 1)}
-    for i in range(1, num_teams + 1):
-        teams = [j for j in range(1, num_teams + 1) if i != j]
-        for x in itertools.permutations(teams):
-            team_seqences[i].append(x)
-
-    cnt = 0
-    cnt_feasible = 0
-    opt_rounds = {i: 0 for i in range(num_teams - 1, 2 * num_teams)}
-    opt_rounds_seqences: dict[int, list[TeamSequence]] = {i: [] for i in range(num_teams - 1, 2 * num_teams)}
-    for x in itertools.product(*(team_seqences.values())):
-        # [NOTE] Type check of mypy is wrong.
-        team_seqence: TeamSequence = {i: s for i, s in enumerate(x, 1)}  # type: ignore
-        factory = BaseProblemFactory()
-        ob = OptimizeByes(team_seqence, factory)
-        ob.solve()
-        if ob.get_status() == OptimizeByes.OPTIMAL:
-            opt_rounds[ob.get_num_rounds()] += 1
-            opt_rounds_seqences[ob.get_num_rounds()].append(team_seqence)
-            cnt_feasible += 1
-        cnt += 1
-    print(f"組合せ全体: {cnt}, 実行可能な組合せ: {cnt_feasible}")
-    print(f"{opt_rounds = }")
-    num_rounds = num_teams - 1
-    print(f"{opt_rounds_seqences[num_rounds]}")
+    # Draw graph and simulate schedule
+    G = converter.convert_team_priority_to_graph(team_priority)
+    opb.draw_simulation("./figures/sample.gif", G, interval=1200)
 
 
 if __name__ == "__main__":
-    main("base")
-    check_all_combinations(num_teams=4)
+    # feasible instance
+    tp1: opb.TeamPriority = {1: (2, 3, 4), 2: (1, 3, 4), 3: (1, 2, 4), 4: (1, 2, 3)}
+    # infeasible instance
+    tp2: opb.TeamPriority = {1: (2, 3, 4), 2: (1, 3, 4), 3: (1, 4, 2), 4: (1, 2, 3)}
+    main(tp1)

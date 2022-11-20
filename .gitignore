@@ -108,3 +108,9 @@ venv.bak/
 
 # poetry
 poetry.lock
+
+# figures
+/figures/*
+!/figures/.gitkeep
+!/figures/sample_feasible.gif
+!/figures/sample_infeasible.gif
