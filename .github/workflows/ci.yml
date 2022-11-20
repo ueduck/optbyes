@@ -62,4 +62,4 @@ jobs:
         commit_message: apply isort and black
         commit_user_name: GitHub Actions
         commit_user_email: actions@github.com
-        ref: ${{ github.head_ref }}
+        branch: ${{ github.head_ref }}
