@@ -1,25 +1,28 @@
 import itertools
 
-from optbyes._typing import TeamPriority
+import optbyes as opb
+
+__all__ = [
+    "generate_team_priorities",
+]
 
 
-def generate_team_priorities(num_teams: int, num_fixed: int = 0) -> list[TeamPriority]:
-    """
-    This is a generator that generates a set of team priority combinations.
+def generate_team_priorities(num_teams: int, num_fixed: int = 0) -> list[opb.TeamPriority]:
+    """Generate a set of team priority combinations.
 
     Parameters
     -----
     num_teams: int
-        the number of teams
-    num_fixed: int, optional
-        the number of teams to fix priorities. Defaults to 0.
+        The number of teams
+    num_fixed: int, optional (default = 0)
+        The number of teams to fix priorities. Defaults to 0.
 
     Returns
     -----
-    team_priorities: list[TeamPriority]
-        Set of team priority combinations
+    team_priorities: list[opb.TeamPriority]
+        A dictionary of the team's desired priority order
 
-    Example
+    Examples
     -----
     >>> generate_team_priorities(4, 4)
     >>> [{1: (2, 3, 4), 2: (1, 3, 4), 3: (1, 2, 4), 4: (1, 2, 3)}]
@@ -40,16 +43,16 @@ def generate_team_priorities(num_teams: int, num_fixed: int = 0) -> list[TeamPri
         fixed_team_priorities_for_team_i = [t for t in range(1, num_teams + 1) if t != i]
         fixed_team_priorities[i] = tuple(fixed_team_priorities_for_team_i)
 
-    # ex) team_priorities_for_team_i = {1: [(2, 3, 4), (2, 4, 3), ...], 2: [...]}
-    team_priorities_for_team_i: dict[int, list[tuple[int, ...]]] = {i: [] for i in range(num_fixed + 1, num_teams + 1)}
+    # ex) priorities_for_team = {1: [(2, 3, 4), (2, 4, 3), ...], 2: [...]}
+    priorities_for_team: dict[int, list[opb.OpposingTeams]] = {i: [] for i in range(num_fixed + 1, num_teams + 1)}
     for i in range(num_fixed + 1, num_teams + 1):
         opposing_teams = [t for t in range(1, num_teams + 1) if t != i]
         for x in itertools.permutations(opposing_teams):
-            team_priorities_for_team_i[i].append(x)
+            priorities_for_team[i].append(x)
 
-    team_priorities: list[TeamPriority] = []  # ex) [{1: (2, 3, 4), 2: (1, 3, 4), ...}, {...}]
-    for x in itertools.product(*(team_priorities_for_team_i.values())):
-        team_priority: TeamPriority = {}
+    team_priorities: list[opb.TeamPriority] = []  # ex) [{1: (2, 3, 4), 2: (1, 3, 4), ...}, {...}]
+    for x in itertools.product(*(priorities_for_team.values())):
+        team_priority: opb.TeamPriority = {}
         # fixed priority teams
         for i in range(1, num_fixed + 1):
             team_priority[i] = fixed_team_priorities[i]
