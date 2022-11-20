@@ -8,10 +8,14 @@ authors = ["hrt0809 <hrt.ueda0809@gmail.com>"]
 python = "^3.10"
 gurobipy = "9.5.2"
 gurobipy-stubs = "*"
+matplotlib = "*"
+networkx = "^2.8.8"
+scipy = "^1.9.3"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "*"
 flake8-bugbear = "*"
+flake8-docstrings = "*"
 pyproject-flake8 = "*"
 mypy = "*"
 isort = "*"
@@ -25,9 +29,11 @@ build-backend = "poetry.core.masonry.api"
 # Following configuration are added manually
 [tool.flake8]
 max-line-length = 119
+max-doc-length = 111
 max-complexity = 10
 select = "C,E,F,W,B"
 ignore = "E203"
+docstring-convention = "numpy"
 
 [tool.black]
 line-length = 119
