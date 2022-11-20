@@ -49,6 +49,7 @@ jobs:
     - name: Sort Module with isort
       run: |
         poetry run isort optbyes/* --skip __init__.py --filter-files
+        poetry run isort experiments/*
         poetry run isort main.py
 
     - name: Apply Code Formatter

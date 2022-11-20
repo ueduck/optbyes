@@ -112,4 +112,5 @@ poetry.lock
 # figures
 /figures/*
 !/figures/.gitkeep
-!/figures/sample.gif
+!/figures/sample_feasible.gif
+!/figures/sample_infeasible.gif
