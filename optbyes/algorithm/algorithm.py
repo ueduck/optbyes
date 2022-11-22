@@ -9,11 +9,11 @@ from scipy import special
 import optbyes as opb
 from optbyes.utils import converter
 
-__all__ = ["OptByesSolver", "BaseProbSolverWithGraph", "ProbSolverWithGurobi"]
+__all__ = ["OptByesAlgorithm", "TopologicalSortAlgorithm", "IterateNumRoundsAlgorithm"]
 
 
-class OptByesSolver(metaclass=ABCMeta):
-    """A base class for All related OptByes Solver
+class OptByesAlgorithm(metaclass=ABCMeta):
+    """A base class for All related OptByes Algorithm
 
     This class is not usable as is, and should be subclassed to provide
     needed behavior.
@@ -87,10 +87,10 @@ class OptByesSolver(metaclass=ABCMeta):
         return num_rounds
 
 
-class BaseProbSolverWithGraph(OptByesSolver):
-    """Base Problem Solver (with Direced Graph)
+class TopologicalSortAlgorithm(OptByesAlgorithm):
+    """Solve the base problem using topological sort
 
-    Solve with the OptimizeByes problem by Graph algorithm,
+    This algorithm solves the base problem using topological sort
     and check whether the instance is feasible or not,
     if so, how many rounds can be achieved.
     """
@@ -101,8 +101,8 @@ class BaseProbSolverWithGraph(OptByesSolver):
         self._G: nx.DiGraph
 
     @classmethod
-    def create_from_graph(cls, num_teams: int, G: nx.DiGraph) -> BaseProbSolverWithGraph:
-        """Construct Solver from Directed Graph
+    def create_from_graph(cls, num_teams: int, G: nx.DiGraph) -> TopologicalSortAlgorithm:
+        """Create instances of algorithm from directed graph
 
         Parameters
         -----
@@ -114,17 +114,17 @@ class BaseProbSolverWithGraph(OptByesSolver):
 
         Returns
         -----
-        solver: BaseProbSolverWithGraph
-            return this solver instance
+        algorithm: TopologicalSortAlgorithm
+            return this
         """
-        solver = cls()
-        solver._num_teams = num_teams
-        solver._G = G.copy()
-        return solver
+        algorithm = cls()
+        algorithm._num_teams = num_teams
+        algorithm._G = G.copy()
+        return algorithm
 
     @classmethod
-    def create_from_team_priority(cls, team_priority: opb.TeamPriority) -> BaseProbSolverWithGraph:
-        """Construct Solver from team priority
+    def create_from_team_priority(cls, team_priority: opb.TeamPriority) -> TopologicalSortAlgorithm:
+        """Create instances of algorithm from team_priority
 
         Parameters
         -----
@@ -133,14 +133,14 @@ class BaseProbSolverWithGraph(OptByesSolver):
 
         Returns
         -----
-        solver: BaseProbSolverWithGraph
-            return this solver instance
+        algorithm: TopologicalSortAlgorithm
+            return this
         """
-        solver = cls()
-        solver._num_teams = len(team_priority)
+        algorithm = cls()
+        algorithm._num_teams = len(team_priority)
         G = converter.convert_team_priority_to_graph(team_priority)
-        solver._G = G
-        return solver
+        algorithm._G = G
+        return algorithm
 
     def _is_feasible(self) -> bool:
         try:
@@ -171,10 +171,10 @@ class BaseProbSolverWithGraph(OptByesSolver):
             num_round += 1
 
 
-class ProbSolverWithGurobi(OptByesSolver):
-    """Base Problem Solver (with Gurobi)
+class IterateNumRoundsAlgorithm(OptByesAlgorithm):
+    """Solve the base problem by iterating the number of rounds
 
-    Solve with the OptimizeByes problem by Gurobi,
+    This algorithm solves the base problem by iterating the number of rounds,
     and check whether the instance is feasible or not,
     if so, how many rounds can be achieved.
     """
@@ -189,8 +189,8 @@ class ProbSolverWithGurobi(OptByesSolver):
     @classmethod
     def create_from_team_priority(
         cls, team_priority: opb.TeamPriority, prob_factory: opb.ILPFactory
-    ) -> ProbSolverWithGurobi:
-        """Construct Solver from team priority
+    ) -> IterateNumRoundsAlgorithm:
+        """Create instances of algorithm from team_priority
 
         Parameters
         -----
@@ -204,16 +204,16 @@ class ProbSolverWithGurobi(OptByesSolver):
 
         Returns
         -----
-        solver: ProbSolverWithGurobi
-            return this solver instance
+        algorithm: IterateNumRoundsAlgorithm
+            return this
         """
-        solver = cls()
-        solver._num_teams = len(team_priority)
-        solver._num_rounds = len(team_priority) - 1
+        algorithm = cls()
+        algorithm._num_teams = len(team_priority)
+        algorithm._num_rounds = len(team_priority) - 1
         tp_array = converter.convert_team_priority_to_team_priority_array(team_priority)
-        solver._tp_array = tp_array
-        solver._prob_factory = prob_factory
-        return solver
+        algorithm._tp_array = tp_array
+        algorithm._prob_factory = prob_factory
+        return algorithm
 
     def solve(self) -> None:
         infeasible_flag = True

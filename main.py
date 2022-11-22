@@ -8,22 +8,22 @@ from optbyes.utils import converter
 
 
 def main(team_priority: opb.TeamPriority) -> None:
-    # solve Graph
-    solver_graph = opb.BaseProbSolverWithGraph.create_from_team_priority(team_priority)
-    # solve ILP
+    # solve with Graph
+    algorithm_1 = opb.TopologicalSortAlgorithm.create_from_team_priority(team_priority)
+    # solve with ILP
     factory = opb.BaseILPFactory()
-    solver_ilp = opb.ProbSolverWithGurobi.create_from_team_priority(team_priority, factory)
+    algorithm_2 = opb.IterateNumRoundsAlgorithm.create_from_team_priority(team_priority, factory)
 
     # Graph Algorithm vs Gurobi
     calc_times: dict[str, float] = {}
-    solvers: dict[str, opb.OptByesSolver] = {"graph": solver_graph, "gurobi": solver_ilp}
-    for solver_name, solver in solvers.items():
+    algorithms: dict[str, opb.OptByesAlgorithm] = {"graph": algorithm_1, "gurobi": algorithm_2}
+    for algorithm_name, algorithm in algorithms.items():
         start_time = time.perf_counter()
-        solver.solve()
+        algorithm.solve()
         calc_time = time.perf_counter() - start_time
-        calc_times[solver_name] = calc_time
-        if solver.get_status() == opb.OPTIMAL:
-            solver.print_schedule()
+        calc_times[algorithm_name] = calc_time
+        if algorithm.get_status() == opb.OPTIMAL:
+            algorithm.print_schedule()
     print(calc_times)
 
     # Draw graph and simulate schedule
