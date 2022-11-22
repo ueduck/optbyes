@@ -39,7 +39,7 @@ def experiment_all_combs_with_gurobi(num_teams: int, num_fixed: int = 0) -> None
     for tp in team_priorities:
         # 1.1 Solve instance
         factory = opb.BaseILPFactory()
-        solver = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+        solver = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
         solver.solve()
         if solver.get_status() == opb.OPTIMAL:
             cnt_feasible += 1
@@ -97,7 +97,7 @@ def experiment_all_combs_with_graph_algorithm(num_teams: int) -> None:
         G.add_edges_from(add_edges, color=opb.EDGE_COLOR)
 
         # 2.3 Test "Does the Graph G have topological sorted order ?"
-        solver = opb.BaseProbSolverWithGraph.create_from_graph(num_teams, G)
+        solver = opb.TopologicalSortAlgorithm.create_from_graph(num_teams, G)
         solver.solve()
         if solver.get_status() == opb.OPTIMAL:
             cnt_feasible += 1

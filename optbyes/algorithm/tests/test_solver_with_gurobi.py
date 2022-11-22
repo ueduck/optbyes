@@ -6,7 +6,7 @@ import optbyes as opb
 def test_not_runnnning_solve_method() -> None:
     tp: opb.TeamPriority = {1: (2, 3, 4), 2: (1, 3, 4), 3: (1, 4, 2), 4: (1, 2, 3)}
     factory = opb.BaseILPFactory()
-    solver = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+    solver = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
     with pytest.raises(opb.NotRunningSolveMethodError) as e:
         solver.get_schedule()
     assert str(e.value) == ""
@@ -15,7 +15,7 @@ def test_not_runnnning_solve_method() -> None:
 def test_infeasible_instance() -> None:
     tp: opb.TeamPriority = {1: (2, 3, 4), 2: (1, 3, 4), 3: (1, 4, 2), 4: (1, 2, 3)}
     factory = opb.BaseILPFactory()
-    solver = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+    solver = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
     solver.solve()
     with pytest.raises(opb.InfeasibleInstanceError) as e:
         solver.get_schedule()
@@ -25,7 +25,7 @@ def test_infeasible_instance() -> None:
 def test_num_byes_teams4_byes8() -> None:
     tp: opb.TeamPriority = {1: (2, 3, 4), 2: (1, 3, 4), 3: (2, 1, 4), 4: (2, 3, 1)}
     factory = opb.BaseILPFactory()
-    solver = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+    solver = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
     solver.solve()
     num_byes = sum(solver.get_num_byes().values())
     assert num_byes == 8
@@ -36,7 +36,7 @@ def test_num_byes_teams4_byes12() -> None:
     tp2: opb.TeamPriority = {1: (2, 3, 4), 2: (1, 4, 3), 3: (2, 1, 4), 4: (2, 1, 3)}
     for tp in [tp1, tp2]:
         factory = opb.BaseILPFactory()
-        solver = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+        solver = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
         solver.solve()
         num_byes = sum(solver.get_num_byes().values())
         assert num_byes == 12
@@ -53,7 +53,7 @@ def test_num_rounds_teams4_round3() -> None:
     ]
     for tp in team_priorities:
         factory = opb.BaseILPFactory()
-        solver = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+        solver = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
         solver.solve()
         assert solver.get_status() == opb.OPTIMAL
         assert solver.get_num_rounds() == 3
@@ -71,7 +71,7 @@ def test_num_rounds_teams4_round4() -> None:
     ]
     for tp in team_priorities:
         factory = opb.BaseILPFactory()
-        prob = opb.ProbSolverWithGurobi.create_from_team_priority(tp, factory)
+        prob = opb.IterateNumRoundsAlgorithm.create_from_team_priority(tp, factory)
         prob.solve()
         assert prob.get_status() == opb.OPTIMAL
         assert prob.get_num_rounds() == 4
